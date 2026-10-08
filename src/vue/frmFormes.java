@@ -6,13 +6,23 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import controleur.Controle;
+import modele.Carre;
+import modele.Cercle;
+import modele.Formes;
+
 import javax.swing.JLabel;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.awt.event.ActionEvent;
 
 public class frmFormes extends JFrame {
 
@@ -20,11 +30,17 @@ public class frmFormes extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtCote;
 	private JTextField txtRayon;
-
+	private Controle controle;
+	JLabel lblPerimetreCarre;
+	JLabel lblSurfaceCarre ;
+	JLabel lblPerimetreCercle;
+	JLabel lblSurfaceCercle ;
+	private DefaultListModel contenuLstFormes = new DefaultListModel();
+	private JList lstFormes;
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -35,12 +51,68 @@ public class frmFormes extends JFrame {
 				}
 			}
 		});
+	}*/
+	
+	
+	/**
+	 * Methode pour calculer le perimetre et la surface du carre en demandant au controleur a partir des valeurs transmises par la vue
+	 * *
+	 */
+	public void cliqueCalculCarre(){
+		controle.demandeVueValeurs("Carré", Float.parseFloat(txtCote.getText()));
 	}
+	
+	public void cliqueCalculCercle(){
+		controle.demandeVueValeurs("Cercle", Float.parseFloat(txtRayon.getText()));
+	}
+	
+	//methode pour afficher les resulats dans les labels
+	public void afficheResultCarre(float perimetre,float surface) {
+		lblPerimetreCarre.setText(""+perimetre);
+		lblSurfaceCarre.setText(""+surface);
+	}
+	
+	//methode pour afficher les resulats dans les labels
+		public void afficheResultCercle(float perimetre,float surface) {
+			lblPerimetreCercle.setText(""+perimetre);
+			lblSurfaceCercle.setText(""+surface);
+		}
+		
+		//Mise a jours de la liste//
+		public void MajListe(ArrayList<Formes>lesFormes) {
+			//vider la liste 
+			contenuLstFormes.clear();
+			// boucle pour remplir la liste 
+			for(Formes uneForme : lesFormes) {
+				String ligne;
+				if(uneForme instanceof Carre) {
+					ligne = "CARRE= côté: "+((Carre)uneForme).getCote();
+				}else {
+					ligne = "CERCLE= rayon: "+((Cercle)uneForme).getRayon();
+				}
+				ligne+= " périmètre: "+uneForme.perimetre()+" surface: "+uneForme.surface();
+				//ajout dans la liste//
+				contenuLstFormes.addElement(ligne);
+			}
+		}
+		
+		/**
+		 * Clique sur le bouton delete
+		 * 
+		 * */
+		public void cmdDel(){
+			int [] lesIndices = lstFormes.getSelectedIndices();
+			for(int k= lesIndices.length-1;k>=0;k--) {
+				controle.demandefrmFormesDelete(lesIndices[k]);
+			}
+		}
+		
 
 	/**
 	 * Create the frame.
 	 */
-	public frmFormes() {
+	public frmFormes(Controle controle) {
+		this.controle=controle;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 574, 544);
 		contentPane = new JPanel();
@@ -69,6 +141,11 @@ public class frmFormes extends JFrame {
 		txtCote.setColumns(10);
 		
 		JButton btnCarre = new JButton("calcul");
+		btnCarre.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cliqueCalculCarre();
+			}
+		});
 		btnCarre.setBounds(439, 10, 89, 23);
 		contentPane.add(btnCarre);
 		
@@ -80,12 +157,12 @@ public class frmFormes extends JFrame {
 		lbl2.setBounds(128, 83, 46, 14);
 		contentPane.add(lbl2);
 		
-		JLabel lblPerimetreCarre = new JLabel("");
+		lblPerimetreCarre = new JLabel("");
 		lblPerimetreCarre.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblPerimetreCarre.setBounds(301, 47, 46, 14);
 		contentPane.add(lblPerimetreCarre);
 		
-		JLabel lblSurfaceCarre = new JLabel("");
+		lblSurfaceCarre = new JLabel("");
 		lblSurfaceCarre.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblSurfaceCarre.setBounds(301, 83, 46, 14);
 		contentPane.add(lblSurfaceCarre);
@@ -108,17 +185,22 @@ public class frmFormes extends JFrame {
 		contentPane.add(txtRayon);
 		txtRayon.setColumns(10);
 		
-		JLabel lblPerimetreCercle = new JLabel("");
+		lblPerimetreCercle = new JLabel("");
 		lblPerimetreCercle.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblPerimetreCercle.setBounds(301, 172, 46, 14);
 		contentPane.add(lblPerimetreCercle);
 		
-		JLabel lblSurfaceCercle = new JLabel("");
+		lblSurfaceCercle = new JLabel("");
 		lblSurfaceCercle.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblSurfaceCercle.setBounds(301, 207, 46, 14);
 		contentPane.add(lblSurfaceCercle);
 		
 		JButton btnCercle = new JButton("calcul");
+		btnCercle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cliqueCalculCercle();
+			}
+		});
 		btnCercle.setBounds(439, 136, 89, 23);
 		contentPane.add(btnCercle);
 		
@@ -126,10 +208,15 @@ public class frmFormes extends JFrame {
 		scrollPane.setBounds(22, 251, 506, 199);
 		contentPane.add(scrollPane);
 		
-		JList lstFormes = new JList();
+		lstFormes = new JList(contenuLstFormes);
 		scrollPane.setViewportView(lstFormes);
 		
 		JButton btnSuppr = new JButton("Supprimer");
+		btnSuppr.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cmdDel();
+			}
+		});
 		btnSuppr.setBounds(439, 471, 89, 23);
 		contentPane.add(btnSuppr);
 
